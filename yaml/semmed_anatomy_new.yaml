@@ -1,0 +1,2276 @@
+openapi: 3.0.0
+info:
+  contact:
+    email: help@biothings.io
+    name: BioThings Team
+    x-id: https://github.com/biothings
+    x-role: responsible developers
+  description: Documentation of the SEMMED disease query web services.  Learn more
+    about [mydisease.info](http://pending.biothings.io/semmed)
+  termsOfService: http://biothings.ncats.io
+  title: SEMMED Anatomy API
+  version: '1.0'
+  x-translator:
+    component: KP
+    team:
+    - Service Provider
+servers:
+- description: Production server
+  url: https://biothings.ncats.io/semmed_anatomy
+tags:
+- name: anatomicalentity
+- name: annotation
+- name: query
+- name: translator
+- name: biothings
+- name: semmed
+paths:
+  /anatomy:
+    post:
+      parameters:
+      - $ref: '#/components/parameters/dotfield'
+        name: dotfield
+      - $ref: '#/components/parameters/fields'
+        name: fields
+      - $ref: '#/components/parameters/email'
+        name: email
+      - $ref: '#/components/parameters/format'
+        name: format
+      requestBody:
+        content:
+          application/x-www-form-urlencoded:
+            schema:
+              properties:
+                ids:
+                  description: 'multiple disease IDs separated by comma. Note that
+                    currently we only take the input ids up to 1000 maximum, the rest
+                    will be omitted. Type: string (list). Max: 1000.'
+                  type: string
+              required:
+              - ids
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                items:
+                  $ref: '#/components/schemas/Disease'
+                type: array
+          description: A list of matching disease objects
+        '400':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResult'
+          description: A response indicating an improperly formatted query
+      summary: For a list of disease IDs, return the matching disease object
+      tags:
+      - gene
+  /anatomy/{anatomyid}:
+    get:
+      parameters:
+      - description: Retrieve disease objects based on ID
+        example: C0004096
+        in: path
+        name: anatomyid
+        required: true
+        schema:
+          type: string
+      - $ref: '#/components/parameters/dotfield'
+        name: dotfield
+      - $ref: '#/components/parameters/callback'
+        name: callback
+      - $ref: '#/components/parameters/fields'
+        name: fields
+      - $ref: '#/components/parameters/email'
+        name: email
+      - $ref: '#/components/parameters/format'
+        name: format
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Disease'
+          description: A matching disease object
+        '404':
+          description: A response indicating an unknown disease ID
+      summary: Retrieve disease objects based on ID
+      tags:
+      - disease
+  /metadata:
+    get:
+      parameters:
+      - $ref: '#/components/parameters/callback'
+        in: query
+        name: callback
+      responses:
+        '200':
+          description: mydisease.info metadata object
+      summary: Get metadata about the data available from mydisease.info
+      tags:
+      - metadata
+  /metadata/fields:
+    get:
+      parameters:
+      - $ref: '#/components/parameters/search'
+        name: search
+      - $ref: '#/components/parameters/callback'
+        name: callback
+      - $ref: '#/components/parameters/prefix'
+        name: prefix
+      - $ref: '#/components/parameters/format'
+        name: format
+      responses:
+        '200':
+          description: mydisease.info metadata fields object
+      summary: Get metadata about the data fields available from a mydisease.info
+        chem object
+      tags:
+      - metadata
+  /query:
+    get:
+      parameters:
+      - description: 'Query string.  The detailed query syntax can be found from our
+          [docs](http://mydisease.info).  Examples: "cancer", "primary ciliary dyskinesia",
+          "DOID:9562"'
+        example: cancer
+        in: query
+        name: q
+        required: true
+        schema:
+          type: string
+      - $ref: '#/components/parameters/dotfield'
+        name: dotfield
+      - $ref: '#/components/parameters/fields'
+        name: fields
+      - $ref: '#/components/parameters/facet_size'
+        name: facet_size
+      - $ref: '#/components/parameters/sort'
+        name: sort
+      - $ref: '#/components/parameters/callback'
+        name: callback
+      - $ref: '#/components/parameters/email'
+        name: email
+      - $ref: '#/components/parameters/facets'
+        name: facets
+      - $ref: '#/components/parameters/size'
+        name: size
+      - $ref: '#/components/parameters/from'
+        name: from
+      - $ref: '#/components/parameters/format'
+        name: format
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/QueryResult'
+          description: A query response with the "hits" property
+        '400':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResult'
+          description: A response indicating an improperly formatted query
+      summary: Make disease queries and return matching disease hits. Supports JSONP
+        and CORS as well.
+      tags:
+      - query
+    post:
+      parameters:
+      - $ref: '#/components/parameters/dotfield'
+        name: dotfield
+      - $ref: '#/components/parameters/email'
+        name: email
+      - $ref: '#/components/parameters/fields'
+        name: fields
+      - $ref: '#/components/parameters/size'
+        name: size
+      - $ref: '#/components/parameters/format'
+        name: format
+      requestBody:
+        content:
+          application/x-www-form-urlencoded:
+            schema:
+              properties:
+                q:
+                  description: multiple query terms separated by comma (also "+" or
+                    whitespace).  Does not support wildcard queries
+                  type: string
+                scopes:
+                  description: 'a comma-separated list of fields as the search "scopes"
+                    (fields to search through for query term). The available "fields"
+                    that can be passed to the "scopes" parameter are listed in the
+                    **/metadata/fields** endpoint.string Default: "scopes=_id".'
+                  type: string
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/QueryPOSTResult'
+          description: Query response objects with the "hits" property
+        '400':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResult'
+          description: A response indicating an improperly formatted query
+      summary: Make batch disease queries and return matching disease hits
+      tags:
+      - query
+      x-bte-kgs-operations:
+      - $ref: '#/components/x-bte-kgs-operations/AnatomicalEntity-has_part-AnatomicalEntity'
+      - $ref: '#/components/x-bte-kgs-operations/AnatomicalEntity-positively_regulated_by-Gene'
+      - $ref: '#/components/x-bte-kgs-operations/AnatomicalEntity-affected_by-ChemicalSubstance'
+      - $ref: '#/components/x-bte-kgs-operations/AnatomicalEntity-disrupted_by-ChemicalSubstance'
+      - $ref: '#/components/x-bte-kgs-operations/AnatomicalEntity-produced_by-Gene'
+      - $ref: '#/components/x-bte-kgs-operations/AnatomicalEntity-occurs_in-BiologicalProcess'
+      - $ref: '#/components/x-bte-kgs-operations/AnatomicalEntity-affects-DiseaseOrPhenotypicFeature'
+      - $ref: '#/components/x-bte-kgs-operations/AnatomicalEntity-related_to-DiseaseOrPhenotypicFeature'
+      - $ref: '#/components/x-bte-kgs-operations/AnatomicalEntity-causes-DiseaseOrPhenotypicFeature'
+      - $ref: '#/components/x-bte-kgs-operations/AnatomicalEntity-location_of-Gene'
+      - $ref: '#/components/x-bte-kgs-operations/AnatomicalEntity-part_of-Cell'
+      - $ref: '#/components/x-bte-kgs-operations/AnatomicalEntity-produces-Gene'
+      - $ref: '#/components/x-bte-kgs-operations/AnatomicalEntity-located_in-AnatomicalEntity'
+      - $ref: '#/components/x-bte-kgs-operations/AnatomicalEntity-has_part-Gene'
+      - $ref: '#/components/x-bte-kgs-operations/AnatomicalEntity-location_of-DiseaseOrPhenotypicFeature'
+      - $ref: '#/components/x-bte-kgs-operations/AnatomicalEntity-has_part-ChemicalSubstance'
+      - $ref: '#/components/x-bte-kgs-operations/AnatomicalEntity-affected_by-Gene'
+      - $ref: '#/components/x-bte-kgs-operations/AnatomicalEntity-produced_by-CellularComponent'
+      - $ref: '#/components/x-bte-kgs-operations/AnatomicalEntity-disrupted_by-Gene'
+      - $ref: '#/components/x-bte-kgs-operations/AnatomicalEntity-produces-AnatomicalEntity'
+      - $ref: '#/components/x-bte-kgs-operations/AnatomicalEntity-location_of-ChemicalSubstance'
+      - $ref: '#/components/x-bte-kgs-operations/AnatomicalEntity-produced_by-Cell'
+      - $ref: '#/components/x-bte-kgs-operations/AnatomicalEntity-part_of-AnatomicalEntity'
+      - $ref: '#/components/x-bte-kgs-operations/AnatomicalEntity-location_of-AnatomicalEntity'
+      - $ref: '#/components/x-bte-kgs-operations/AnatomicalEntity-located_in-CellularComponent'
+      - $ref: '#/components/x-bte-kgs-operations/AnatomicalEntity-quantifier_qualifier-Gene'
+      - $ref: '#/components/x-bte-kgs-operations/AnatomicalEntity-produced_by-DiseaseOrPhenotypicFeature'
+      - $ref: '#/components/x-bte-kgs-operations/AnatomicalEntity-affected_by-DiseaseOrPhenotypicFeature'
+      - $ref: '#/components/x-bte-kgs-operations/AnatomicalEntity-positively_regulated_by-ChemicalSubstance'
+      - $ref: '#/components/x-bte-kgs-operations/AnatomicalEntity-interacts_with-Gene'
+      - $ref: '#/components/x-bte-kgs-operations/AnatomicalEntity-coexists_with-BiologicalProcess'
+      - $ref: '#/components/x-bte-kgs-operations/AnatomicalEntity-has_manifestation-DiseaseOrPhenotypicFeature'
+      - $ref: '#/components/x-bte-kgs-operations/AnatomicalEntity-preceded_by-BiologicalProcess'
+      - $ref: '#/components/x-bte-kgs-operations/AnatomicalEntity-entity_positively_regulated_by_entity-DiseaseOrPhenotypicFeature'
+      - $ref: '#/components/x-bte-kgs-operations/AnatomicalEntity-subclass_of-BiologicalProcess'
+      - $ref: '#/components/x-bte-kgs-operations/AnatomicalEntity-precedes-BiologicalProcess'
+      - $ref: '#/components/x-bte-kgs-operations/AnatomicalEntity-produces-ChemicalSubstance'
+      - $ref: '#/components/x-bte-kgs-operations/AnatomicalEntity-occurs_in-DiseaseOrPhenotypicFeature'
+      - $ref: '#/components/x-bte-kgs-operations/AnatomicalEntity-has_part-BiologicalProcess'
+      - $ref: '#/components/x-bte-kgs-operations/AnatomicalEntity-produces-BiologicalProcess'
+      - $ref: '#/components/x-bte-kgs-operations/AnatomicalEntity-produced_by-BiologicalProcess'
+      - $ref: '#/components/x-bte-kgs-operations/AnatomicalEntity-related_to-Gene'
+      - $ref: '#/components/x-bte-kgs-operations/AnatomicalEntity-quantifier_qualifier-PhenotypicFeature'
+      - $ref: '#/components/x-bte-kgs-operations/AnatomicalEntity-has_part-Cell'
+      - $ref: '#/components/x-bte-kgs-operations/AnatomicalEntity-location_of-BiologicalProcess'
+      - $ref: '#/components/x-bte-kgs-operations/AnatomicalEntity-has_part-DiseaseOrPhenotypicFeature'
+      - $ref: '#/components/x-bte-kgs-operations/AnatomicalEntity-quantifier_qualifier-ChemicalSubstance'
+      - $ref: '#/components/x-bte-kgs-operations/AnatomicalEntity-coexists_with-DiseaseOrPhenotypicFeature'
+      - $ref: '#/components/x-bte-kgs-operations/AnatomicalEntity-part_of-BiologicalProcess'
+      - $ref: '#/components/x-bte-kgs-operations/AnatomicalEntity-disrupted_by-DiseaseOrPhenotypicFeature'
+      - $ref: '#/components/x-bte-kgs-operations/AnatomicalEntity-has_part-CellularComponent'
+      - $ref: '#/components/x-bte-kgs-operations/AnatomicalEntity-produces-DiseaseOrPhenotypicFeature'
+      - $ref: '#/components/x-bte-kgs-operations/AnatomicalEntity-part_of-DiseaseOrPhenotypicFeature'
+      - $ref: '#/components/x-bte-kgs-operations/AnatomicalEntity-related_to-AnatomicalEntity'
+      - $ref: '#/components/x-bte-kgs-operations/AnatomicalEntity-treats-DiseaseOrPhenotypicFeature'
+      - $ref: '#/components/x-bte-kgs-operations/AnatomicalEntity-affected_by-BiologicalProcess'
+      - $ref: '#/components/x-bte-kgs-operations/AnatomicalEntity-subclass_of-DiseaseOrPhenotypicFeature'
+      - $ref: '#/components/x-bte-kgs-operations/AnatomicalEntity-entity_negatively_regulated_by_entity-Gene'
+      - $ref: '#/components/x-bte-kgs-operations/AnatomicalEntity-located_in-Cell'
+      - $ref: '#/components/x-bte-kgs-operations/AnatomicalEntity-coexists_with-Gene'
+      - $ref: '#/components/x-bte-kgs-operations/AnatomicalEntity-physically_interacts_with-Cell'
+      - $ref: '#/components/x-bte-kgs-operations/AnatomicalEntity-entity_positively_regulates_entity-Cell'
+      - $ref: '#/components/x-bte-kgs-operations/AnatomicalEntity-related_to-BiologicalProcess'
+      - $ref: '#/components/x-bte-kgs-operations/AnatomicalEntity-entity_negatively_regulated_by_entity-ChemicalSubstance'
+      - $ref: '#/components/x-bte-kgs-operations/AnatomicalEntity-superclass_of-DiseaseOrPhenotypicFeature'
+      - $ref: '#/components/x-bte-kgs-operations/AnatomicalEntity-interacts_with-DiseaseOrPhenotypicFeature'
+      - $ref: '#/components/x-bte-kgs-operations/AnatomicalEntity-predisposes-DiseaseOrPhenotypicFeature'
+      - $ref: '#/components/x-bte-kgs-operations/AnatomicalEntity-preceded_by-DiseaseOrPhenotypicFeature'
+      - $ref: '#/components/x-bte-kgs-operations/AnatomicalEntity-location_of-CellularComponent'
+      - $ref: '#/components/x-bte-kgs-operations/AnatomicalEntity-physically_interacts_with-ChemicalSubstance'
+      - $ref: '#/components/x-bte-kgs-operations/AnatomicalEntity-affects-BiologicalProcess'
+      - $ref: '#/components/x-bte-kgs-operations/AnatomicalEntity-related_to-PhenotypicFeature'
+      - $ref: '#/components/x-bte-kgs-operations/AnatomicalEntity-biomarker_for-DiseaseOrPhenotypicFeature'
+      - $ref: '#/components/x-bte-kgs-operations/AnatomicalEntity-manifestation_of-BiologicalProcess'
+      - $ref: '#/components/x-bte-kgs-operations/AnatomicalEntity-location_of-PhenotypicFeature'
+      - $ref: '#/components/x-bte-kgs-operations/AnatomicalEntity-location_of-Cell'
+components:
+  parameters:
+    callback:
+      description: 'you can pass a "callback" parameter to make a JSONP call. Type:
+        string.'
+      in: query
+      name: callback
+      schema:
+        type: string
+    dotfield:
+      description: 'control the format of the returned disease object. If "true" or
+        "1", all fields will be collapsed into a single level deep object (all nested
+        objects will be a single level deep, using dotfield notation to signify the
+        nested structure) Type: boolean. Default: false.'
+      in: query
+      name: dotfield
+      schema:
+        type: boolean
+    email:
+      description: If you are regular users of our services, we encourage you to provide
+        us with an email, so that we can better track the usage or follow up with
+        you.
+      in: query
+      name: email
+      schema:
+        type: string
+    facet_size:
+      description: 'the number of facet buckets to return in the response. Type: integer.
+        Default: 10. Max: 1000.'
+      in: query
+      name: facet_size
+      schema:
+        type: integer
+    facets:
+      description: 'a comma-separated list of fields to return facets on.  In addition
+        to query hits, the fields notated in "facets" will be aggregated by value
+        and bucklet counts will be displayed in the "facets" field of the response
+        object. Type: string (list). Default: None. Max: 1000.'
+      in: query
+      name: facets
+      schema:
+        type: string
+    fields:
+      description: 'a comma-separated list of fields (in dotfield notation) used to
+        limit the fields returned from the matching disease hit(s). The supported
+        field names can be found from any disease object or from the /metadata/fields
+        endpoint. If "fields=all", all available fields will be returned. Type: string
+        (list). Default: all. Max: 1000.'
+      in: query
+      name: fields
+      schema:
+        type: string
+    format:
+      description: 'controls output format of server response, currently supports:
+        "json", "jsonld", "html". Type: string. Default: json.'
+      in: query
+      name: format
+      schema:
+        type: string
+    from:
+      description: 'the number of matching disease hits to skip, starting from 0.  This
+        can be useful for paging in combination with the "size" parameter. Type: integer.
+        Default: None.'
+      in: query
+      name: from
+      schema:
+        type: integer
+    prefix:
+      description: 'Pass a prefix string to filter the available fields. Type: string.
+        Default: None.'
+      in: query
+      name: prefix
+      schema:
+        type: string
+    search:
+      description: 'Pass a search term to filter the available fields. Type: string.
+        Default: None.'
+      in: query
+      name: search
+      schema:
+        type: string
+    size:
+      description: 'the maximum number of matching disease hits to return per batch.
+        Type: integer. Default: 10.'
+      in: query
+      name: size
+      schema:
+        type: integer
+    sort:
+      description: 'the comma-separated list of fields to sort on. Prefix each with
+        "-" for descending order, otherwise in ascending order. Default: sort by descending
+        score.'
+      in: query
+      name: sort
+      schema:
+        type: string
+  schemas:
+    Disease:
+      properties:
+        _id:
+          type: string
+      required:
+      - _id
+      type: object
+    ErrorResult:
+      properties:
+        message:
+          type: string
+        success:
+          type: boolean
+      type: object
+    QueryPOSTResult:
+      items:
+        allOf:
+        - $ref: '#/components/schemas/Disease'
+        - properties:
+            _score:
+              format: float
+              type: number
+            query:
+              type: string
+          type: object
+      type: array
+    QueryResult:
+      properties:
+        hits:
+          items:
+            $ref: '#/components/schemas/Disease'
+          type: array
+        max_score:
+          format: float
+          type: number
+        took:
+          type: integer
+        total:
+          type: integer
+      type: object
+    int64_or_array:
+      oneOf:
+      - items:
+          format: int64
+          type: integer
+        type: array
+      - format: int64
+        type: integer
+    string_or_array:
+      oneOf:
+      - items:
+          type: string
+        type: array
+      - type: string
+  x-bte-kgs-operations:
+    AnatomicalEntity-has_part-AnatomicalEntity:
+    - inputSeparator: ','
+      inputs:
+      - id: UMLS
+        semantic: AnatomicalEntity
+      method: post
+      source: SEMMED
+      outputs:
+      - id: UMLS
+        semantic: AnatomicalEntity
+      parameters:
+        fields: has_part
+      path: /query
+      requestBody:
+        body:
+          q: '{inputs[0]}'
+          scopes: umls
+      supportBatch: true
+      response_mapping:
+        $ref: '#/components/x-bte-response-mapping/AnatomicalEntity-has_part-AnatomicalEntity'
+      predicate: has_part
+    AnatomicalEntity-positively_regulated_by-Gene:
+    - inputSeparator: ','
+      inputs:
+      - id: UMLS
+        semantic: AnatomicalEntity
+      method: post
+      source: SEMMED
+      outputs:
+      - id: UMLS
+        semantic: Gene
+      parameters:
+        fields: positively_regulated_by
+      path: /query
+      requestBody:
+        body:
+          q: '{inputs[0]}'
+          scopes: umls
+      supportBatch: true
+      response_mapping:
+        $ref: '#/components/x-bte-response-mapping/AnatomicalEntity-positively_regulated_by-Gene'
+      predicate: positively_regulated_by
+    AnatomicalEntity-affected_by-ChemicalSubstance:
+    - inputSeparator: ','
+      inputs:
+      - id: UMLS
+        semantic: AnatomicalEntity
+      method: post
+      source: SEMMED
+      outputs:
+      - id: UMLS
+        semantic: ChemicalSubstance
+      parameters:
+        fields: affected_by
+      path: /query
+      requestBody:
+        body:
+          q: '{inputs[0]}'
+          scopes: umls
+      supportBatch: true
+      response_mapping:
+        $ref: '#/components/x-bte-response-mapping/AnatomicalEntity-affected_by-ChemicalSubstance'
+      predicate: affected_by
+    AnatomicalEntity-disrupted_by-ChemicalSubstance:
+    - inputSeparator: ','
+      inputs:
+      - id: UMLS
+        semantic: AnatomicalEntity
+      method: post
+      source: SEMMED
+      outputs:
+      - id: UMLS
+        semantic: ChemicalSubstance
+      parameters:
+        fields: disrupted_by
+      path: /query
+      requestBody:
+        body:
+          q: '{inputs[0]}'
+          scopes: umls
+      supportBatch: true
+      response_mapping:
+        $ref: '#/components/x-bte-response-mapping/AnatomicalEntity-disrupted_by-ChemicalSubstance'
+      predicate: disrupted_by
+    AnatomicalEntity-produced_by-Gene:
+    - inputSeparator: ','
+      inputs:
+      - id: UMLS
+        semantic: AnatomicalEntity
+      method: post
+      source: SEMMED
+      outputs:
+      - id: UMLS
+        semantic: Gene
+      parameters:
+        fields: produced_by
+      path: /query
+      requestBody:
+        body:
+          q: '{inputs[0]}'
+          scopes: umls
+      supportBatch: true
+      response_mapping:
+        $ref: '#/components/x-bte-response-mapping/AnatomicalEntity-produced_by-Gene'
+      predicate: produced_by
+    AnatomicalEntity-occurs_in-BiologicalProcess:
+    - inputSeparator: ','
+      inputs:
+      - id: UMLS
+        semantic: AnatomicalEntity
+      method: post
+      source: SEMMED
+      outputs:
+      - id: UMLS
+        semantic: BiologicalProcess
+      parameters:
+        fields: occurs_in
+      path: /query
+      requestBody:
+        body:
+          q: '{inputs[0]}'
+          scopes: umls
+      supportBatch: true
+      response_mapping:
+        $ref: '#/components/x-bte-response-mapping/AnatomicalEntity-occurs_in-BiologicalProcess'
+      predicate: occurs_in
+    AnatomicalEntity-affects-DiseaseOrPhenotypicFeature:
+    - inputSeparator: ','
+      inputs:
+      - id: UMLS
+        semantic: AnatomicalEntity
+      method: post
+      source: SEMMED
+      outputs:
+      - id: UMLS
+        semantic: DiseaseOrPhenotypicFeature
+      parameters:
+        fields: affects
+      path: /query
+      requestBody:
+        body:
+          q: '{inputs[0]}'
+          scopes: umls
+      supportBatch: true
+      response_mapping:
+        $ref: '#/components/x-bte-response-mapping/AnatomicalEntity-affects-DiseaseOrPhenotypicFeature'
+      predicate: affects
+    AnatomicalEntity-related_to-DiseaseOrPhenotypicFeature:
+    - inputSeparator: ','
+      inputs:
+      - id: UMLS
+        semantic: AnatomicalEntity
+      method: post
+      source: SEMMED
+      outputs:
+      - id: UMLS
+        semantic: DiseaseOrPhenotypicFeature
+      parameters:
+        fields: related_to
+      path: /query
+      requestBody:
+        body:
+          q: '{inputs[0]}'
+          scopes: umls
+      supportBatch: true
+      response_mapping:
+        $ref: '#/components/x-bte-response-mapping/AnatomicalEntity-related_to-DiseaseOrPhenotypicFeature'
+      predicate: related_to
+    AnatomicalEntity-causes-DiseaseOrPhenotypicFeature:
+    - inputSeparator: ','
+      inputs:
+      - id: UMLS
+        semantic: AnatomicalEntity
+      method: post
+      source: SEMMED
+      outputs:
+      - id: UMLS
+        semantic: DiseaseOrPhenotypicFeature
+      parameters:
+        fields: causes
+      path: /query
+      requestBody:
+        body:
+          q: '{inputs[0]}'
+          scopes: umls
+      supportBatch: true
+      response_mapping:
+        $ref: '#/components/x-bte-response-mapping/AnatomicalEntity-causes-DiseaseOrPhenotypicFeature'
+      predicate: causes
+    AnatomicalEntity-location_of-Gene:
+    - inputSeparator: ','
+      inputs:
+      - id: UMLS
+        semantic: AnatomicalEntity
+      method: post
+      source: SEMMED
+      outputs:
+      - id: UMLS
+        semantic: Gene
+      parameters:
+        fields: location_of
+      path: /query
+      requestBody:
+        body:
+          q: '{inputs[0]}'
+          scopes: umls
+      supportBatch: true
+      response_mapping:
+        $ref: '#/components/x-bte-response-mapping/AnatomicalEntity-location_of-Gene'
+      predicate: location_of
+    AnatomicalEntity-part_of-Cell:
+    - inputSeparator: ','
+      inputs:
+      - id: UMLS
+        semantic: AnatomicalEntity
+      method: post
+      source: SEMMED
+      outputs:
+      - id: UMLS
+        semantic: Cell
+      parameters:
+        fields: part_of
+      path: /query
+      requestBody:
+        body:
+          q: '{inputs[0]}'
+          scopes: umls
+      supportBatch: true
+      response_mapping:
+        $ref: '#/components/x-bte-response-mapping/AnatomicalEntity-part_of-Cell'
+      predicate: part_of
+    AnatomicalEntity-produces-Gene:
+    - inputSeparator: ','
+      inputs:
+      - id: UMLS
+        semantic: AnatomicalEntity
+      method: post
+      source: SEMMED
+      outputs:
+      - id: UMLS
+        semantic: Gene
+      parameters:
+        fields: produces
+      path: /query
+      requestBody:
+        body:
+          q: '{inputs[0]}'
+          scopes: umls
+      supportBatch: true
+      response_mapping:
+        $ref: '#/components/x-bte-response-mapping/AnatomicalEntity-produces-Gene'
+      predicate: produces
+    AnatomicalEntity-located_in-AnatomicalEntity:
+    - inputSeparator: ','
+      inputs:
+      - id: UMLS
+        semantic: AnatomicalEntity
+      method: post
+      source: SEMMED
+      outputs:
+      - id: UMLS
+        semantic: AnatomicalEntity
+      parameters:
+        fields: located_in
+      path: /query
+      requestBody:
+        body:
+          q: '{inputs[0]}'
+          scopes: umls
+      supportBatch: true
+      response_mapping:
+        $ref: '#/components/x-bte-response-mapping/AnatomicalEntity-located_in-AnatomicalEntity'
+      predicate: located_in
+    AnatomicalEntity-has_part-Gene:
+    - inputSeparator: ','
+      inputs:
+      - id: UMLS
+        semantic: AnatomicalEntity
+      method: post
+      source: SEMMED
+      outputs:
+      - id: UMLS
+        semantic: Gene
+      parameters:
+        fields: has_part
+      path: /query
+      requestBody:
+        body:
+          q: '{inputs[0]}'
+          scopes: umls
+      supportBatch: true
+      response_mapping:
+        $ref: '#/components/x-bte-response-mapping/AnatomicalEntity-has_part-Gene'
+      predicate: has_part
+    AnatomicalEntity-location_of-DiseaseOrPhenotypicFeature:
+    - inputSeparator: ','
+      inputs:
+      - id: UMLS
+        semantic: AnatomicalEntity
+      method: post
+      source: SEMMED
+      outputs:
+      - id: UMLS
+        semantic: DiseaseOrPhenotypicFeature
+      parameters:
+        fields: location_of
+      path: /query
+      requestBody:
+        body:
+          q: '{inputs[0]}'
+          scopes: umls
+      supportBatch: true
+      response_mapping:
+        $ref: '#/components/x-bte-response-mapping/AnatomicalEntity-location_of-DiseaseOrPhenotypicFeature'
+      predicate: location_of
+    AnatomicalEntity-has_part-ChemicalSubstance:
+    - inputSeparator: ','
+      inputs:
+      - id: UMLS
+        semantic: AnatomicalEntity
+      method: post
+      source: SEMMED
+      outputs:
+      - id: UMLS
+        semantic: ChemicalSubstance
+      parameters:
+        fields: has_part
+      path: /query
+      requestBody:
+        body:
+          q: '{inputs[0]}'
+          scopes: umls
+      supportBatch: true
+      response_mapping:
+        $ref: '#/components/x-bte-response-mapping/AnatomicalEntity-has_part-ChemicalSubstance'
+      predicate: has_part
+    AnatomicalEntity-affected_by-Gene:
+    - inputSeparator: ','
+      inputs:
+      - id: UMLS
+        semantic: AnatomicalEntity
+      method: post
+      source: SEMMED
+      outputs:
+      - id: UMLS
+        semantic: Gene
+      parameters:
+        fields: affected_by
+      path: /query
+      requestBody:
+        body:
+          q: '{inputs[0]}'
+          scopes: umls
+      supportBatch: true
+      response_mapping:
+        $ref: '#/components/x-bte-response-mapping/AnatomicalEntity-affected_by-Gene'
+      predicate: affected_by
+    AnatomicalEntity-produced_by-CellularComponent:
+    - inputSeparator: ','
+      inputs:
+      - id: UMLS
+        semantic: AnatomicalEntity
+      method: post
+      source: SEMMED
+      outputs:
+      - id: UMLS
+        semantic: CellularComponent
+      parameters:
+        fields: produced_by
+      path: /query
+      requestBody:
+        body:
+          q: '{inputs[0]}'
+          scopes: umls
+      supportBatch: true
+      response_mapping:
+        $ref: '#/components/x-bte-response-mapping/AnatomicalEntity-produced_by-CellularComponent'
+      predicate: produced_by
+    AnatomicalEntity-disrupted_by-Gene:
+    - inputSeparator: ','
+      inputs:
+      - id: UMLS
+        semantic: AnatomicalEntity
+      method: post
+      source: SEMMED
+      outputs:
+      - id: UMLS
+        semantic: Gene
+      parameters:
+        fields: disrupted_by
+      path: /query
+      requestBody:
+        body:
+          q: '{inputs[0]}'
+          scopes: umls
+      supportBatch: true
+      response_mapping:
+        $ref: '#/components/x-bte-response-mapping/AnatomicalEntity-disrupted_by-Gene'
+      predicate: disrupted_by
+    AnatomicalEntity-produces-AnatomicalEntity:
+    - inputSeparator: ','
+      inputs:
+      - id: UMLS
+        semantic: AnatomicalEntity
+      method: post
+      source: SEMMED
+      outputs:
+      - id: UMLS
+        semantic: AnatomicalEntity
+      parameters:
+        fields: produces
+      path: /query
+      requestBody:
+        body:
+          q: '{inputs[0]}'
+          scopes: umls
+      supportBatch: true
+      response_mapping:
+        $ref: '#/components/x-bte-response-mapping/AnatomicalEntity-produces-AnatomicalEntity'
+      predicate: produces
+    AnatomicalEntity-location_of-ChemicalSubstance:
+    - inputSeparator: ','
+      inputs:
+      - id: UMLS
+        semantic: AnatomicalEntity
+      method: post
+      source: SEMMED
+      outputs:
+      - id: UMLS
+        semantic: ChemicalSubstance
+      parameters:
+        fields: location_of
+      path: /query
+      requestBody:
+        body:
+          q: '{inputs[0]}'
+          scopes: umls
+      supportBatch: true
+      response_mapping:
+        $ref: '#/components/x-bte-response-mapping/AnatomicalEntity-location_of-ChemicalSubstance'
+      predicate: location_of
+    AnatomicalEntity-produced_by-Cell:
+    - inputSeparator: ','
+      inputs:
+      - id: UMLS
+        semantic: AnatomicalEntity
+      method: post
+      source: SEMMED
+      outputs:
+      - id: UMLS
+        semantic: Cell
+      parameters:
+        fields: produced_by
+      path: /query
+      requestBody:
+        body:
+          q: '{inputs[0]}'
+          scopes: umls
+      supportBatch: true
+      response_mapping:
+        $ref: '#/components/x-bte-response-mapping/AnatomicalEntity-produced_by-Cell'
+      predicate: produced_by
+    AnatomicalEntity-part_of-AnatomicalEntity:
+    - inputSeparator: ','
+      inputs:
+      - id: UMLS
+        semantic: AnatomicalEntity
+      method: post
+      source: SEMMED
+      outputs:
+      - id: UMLS
+        semantic: AnatomicalEntity
+      parameters:
+        fields: part_of
+      path: /query
+      requestBody:
+        body:
+          q: '{inputs[0]}'
+          scopes: umls
+      supportBatch: true
+      response_mapping:
+        $ref: '#/components/x-bte-response-mapping/AnatomicalEntity-part_of-AnatomicalEntity'
+      predicate: part_of
+    AnatomicalEntity-location_of-AnatomicalEntity:
+    - inputSeparator: ','
+      inputs:
+      - id: UMLS
+        semantic: AnatomicalEntity
+      method: post
+      source: SEMMED
+      outputs:
+      - id: UMLS
+        semantic: AnatomicalEntity
+      parameters:
+        fields: location_of
+      path: /query
+      requestBody:
+        body:
+          q: '{inputs[0]}'
+          scopes: umls
+      supportBatch: true
+      response_mapping:
+        $ref: '#/components/x-bte-response-mapping/AnatomicalEntity-location_of-AnatomicalEntity'
+      predicate: location_of
+    AnatomicalEntity-located_in-CellularComponent:
+    - inputSeparator: ','
+      inputs:
+      - id: UMLS
+        semantic: AnatomicalEntity
+      method: post
+      source: SEMMED
+      outputs:
+      - id: UMLS
+        semantic: CellularComponent
+      parameters:
+        fields: located_in
+      path: /query
+      requestBody:
+        body:
+          q: '{inputs[0]}'
+          scopes: umls
+      supportBatch: true
+      response_mapping:
+        $ref: '#/components/x-bte-response-mapping/AnatomicalEntity-located_in-CellularComponent'
+      predicate: located_in
+    AnatomicalEntity-quantifier_qualifier-Gene:
+    - inputSeparator: ','
+      inputs:
+      - id: UMLS
+        semantic: AnatomicalEntity
+      method: post
+      source: SEMMED
+      outputs:
+      - id: UMLS
+        semantic: Gene
+      parameters:
+        fields: quantifier_qualifier
+      path: /query
+      requestBody:
+        body:
+          q: '{inputs[0]}'
+          scopes: umls
+      supportBatch: true
+      response_mapping:
+        $ref: '#/components/x-bte-response-mapping/AnatomicalEntity-quantifier_qualifier-Gene'
+      predicate: quantifier_qualifier
+    AnatomicalEntity-produced_by-DiseaseOrPhenotypicFeature:
+    - inputSeparator: ','
+      inputs:
+      - id: UMLS
+        semantic: AnatomicalEntity
+      method: post
+      source: SEMMED
+      outputs:
+      - id: UMLS
+        semantic: DiseaseOrPhenotypicFeature
+      parameters:
+        fields: produced_by
+      path: /query
+      requestBody:
+        body:
+          q: '{inputs[0]}'
+          scopes: umls
+      supportBatch: true
+      response_mapping:
+        $ref: '#/components/x-bte-response-mapping/AnatomicalEntity-produced_by-DiseaseOrPhenotypicFeature'
+      predicate: produced_by
+    AnatomicalEntity-affected_by-DiseaseOrPhenotypicFeature:
+    - inputSeparator: ','
+      inputs:
+      - id: UMLS
+        semantic: AnatomicalEntity
+      method: post
+      source: SEMMED
+      outputs:
+      - id: UMLS
+        semantic: DiseaseOrPhenotypicFeature
+      parameters:
+        fields: affected_by
+      path: /query
+      requestBody:
+        body:
+          q: '{inputs[0]}'
+          scopes: umls
+      supportBatch: true
+      response_mapping:
+        $ref: '#/components/x-bte-response-mapping/AnatomicalEntity-affected_by-DiseaseOrPhenotypicFeature'
+      predicate: affected_by
+    AnatomicalEntity-positively_regulated_by-ChemicalSubstance:
+    - inputSeparator: ','
+      inputs:
+      - id: UMLS
+        semantic: AnatomicalEntity
+      method: post
+      source: SEMMED
+      outputs:
+      - id: UMLS
+        semantic: ChemicalSubstance
+      parameters:
+        fields: positively_regulated_by
+      path: /query
+      requestBody:
+        body:
+          q: '{inputs[0]}'
+          scopes: umls
+      supportBatch: true
+      response_mapping:
+        $ref: '#/components/x-bte-response-mapping/AnatomicalEntity-positively_regulated_by-ChemicalSubstance'
+      predicate: positively_regulated_by
+    AnatomicalEntity-interacts_with-Gene:
+    - inputSeparator: ','
+      inputs:
+      - id: UMLS
+        semantic: AnatomicalEntity
+      method: post
+      source: SEMMED
+      outputs:
+      - id: UMLS
+        semantic: Gene
+      parameters:
+        fields: interacts_with
+      path: /query
+      requestBody:
+        body:
+          q: '{inputs[0]}'
+          scopes: umls
+      supportBatch: true
+      response_mapping:
+        $ref: '#/components/x-bte-response-mapping/AnatomicalEntity-interacts_with-Gene'
+      predicate: interacts_with
+    AnatomicalEntity-coexists_with-BiologicalProcess:
+    - inputSeparator: ','
+      inputs:
+      - id: UMLS
+        semantic: AnatomicalEntity
+      method: post
+      source: SEMMED
+      outputs:
+      - id: UMLS
+        semantic: BiologicalProcess
+      parameters:
+        fields: coexists_with
+      path: /query
+      requestBody:
+        body:
+          q: '{inputs[0]}'
+          scopes: umls
+      supportBatch: true
+      response_mapping:
+        $ref: '#/components/x-bte-response-mapping/AnatomicalEntity-coexists_with-BiologicalProcess'
+      predicate: coexists_with
+    AnatomicalEntity-has_manifestation-DiseaseOrPhenotypicFeature:
+    - inputSeparator: ','
+      inputs:
+      - id: UMLS
+        semantic: AnatomicalEntity
+      method: post
+      source: SEMMED
+      outputs:
+      - id: UMLS
+        semantic: DiseaseOrPhenotypicFeature
+      parameters:
+        fields: has_manifestation
+      path: /query
+      requestBody:
+        body:
+          q: '{inputs[0]}'
+          scopes: umls
+      supportBatch: true
+      response_mapping:
+        $ref: '#/components/x-bte-response-mapping/AnatomicalEntity-has_manifestation-DiseaseOrPhenotypicFeature'
+      predicate: has_manifestation
+    AnatomicalEntity-preceded_by-BiologicalProcess:
+    - inputSeparator: ','
+      inputs:
+      - id: UMLS
+        semantic: AnatomicalEntity
+      method: post
+      source: SEMMED
+      outputs:
+      - id: UMLS
+        semantic: BiologicalProcess
+      parameters:
+        fields: preceded_by
+      path: /query
+      requestBody:
+        body:
+          q: '{inputs[0]}'
+          scopes: umls
+      supportBatch: true
+      response_mapping:
+        $ref: '#/components/x-bte-response-mapping/AnatomicalEntity-preceded_by-BiologicalProcess'
+      predicate: preceded_by
+    AnatomicalEntity-entity_positively_regulated_by_entity-DiseaseOrPhenotypicFeature:
+    - inputSeparator: ','
+      inputs:
+      - id: UMLS
+        semantic: AnatomicalEntity
+      method: post
+      source: SEMMED
+      outputs:
+      - id: UMLS
+        semantic: DiseaseOrPhenotypicFeature
+      parameters:
+        fields: entity_positively_regulated_by_entity
+      path: /query
+      requestBody:
+        body:
+          q: '{inputs[0]}'
+          scopes: umls
+      supportBatch: true
+      response_mapping:
+        $ref: '#/components/x-bte-response-mapping/AnatomicalEntity-entity_positively_regulated_by_entity-DiseaseOrPhenotypicFeature'
+      predicate: entity_positively_regulated_by_entity
+    AnatomicalEntity-subclass_of-BiologicalProcess:
+    - inputSeparator: ','
+      inputs:
+      - id: UMLS
+        semantic: AnatomicalEntity
+      method: post
+      source: SEMMED
+      outputs:
+      - id: UMLS
+        semantic: BiologicalProcess
+      parameters:
+        fields: subclass_of
+      path: /query
+      requestBody:
+        body:
+          q: '{inputs[0]}'
+          scopes: umls
+      supportBatch: true
+      response_mapping:
+        $ref: '#/components/x-bte-response-mapping/AnatomicalEntity-subclass_of-BiologicalProcess'
+      predicate: subclass_of
+    AnatomicalEntity-precedes-BiologicalProcess:
+    - inputSeparator: ','
+      inputs:
+      - id: UMLS
+        semantic: AnatomicalEntity
+      method: post
+      source: SEMMED
+      outputs:
+      - id: UMLS
+        semantic: BiologicalProcess
+      parameters:
+        fields: precedes
+      path: /query
+      requestBody:
+        body:
+          q: '{inputs[0]}'
+          scopes: umls
+      supportBatch: true
+      response_mapping:
+        $ref: '#/components/x-bte-response-mapping/AnatomicalEntity-precedes-BiologicalProcess'
+      predicate: precedes
+    AnatomicalEntity-produces-ChemicalSubstance:
+    - inputSeparator: ','
+      inputs:
+      - id: UMLS
+        semantic: AnatomicalEntity
+      method: post
+      source: SEMMED
+      outputs:
+      - id: UMLS
+        semantic: ChemicalSubstance
+      parameters:
+        fields: produces
+      path: /query
+      requestBody:
+        body:
+          q: '{inputs[0]}'
+          scopes: umls
+      supportBatch: true
+      response_mapping:
+        $ref: '#/components/x-bte-response-mapping/AnatomicalEntity-produces-ChemicalSubstance'
+      predicate: produces
+    AnatomicalEntity-occurs_in-DiseaseOrPhenotypicFeature:
+    - inputSeparator: ','
+      inputs:
+      - id: UMLS
+        semantic: AnatomicalEntity
+      method: post
+      source: SEMMED
+      outputs:
+      - id: UMLS
+        semantic: DiseaseOrPhenotypicFeature
+      parameters:
+        fields: occurs_in
+      path: /query
+      requestBody:
+        body:
+          q: '{inputs[0]}'
+          scopes: umls
+      supportBatch: true
+      response_mapping:
+        $ref: '#/components/x-bte-response-mapping/AnatomicalEntity-occurs_in-DiseaseOrPhenotypicFeature'
+      predicate: occurs_in
+    AnatomicalEntity-has_part-BiologicalProcess:
+    - inputSeparator: ','
+      inputs:
+      - id: UMLS
+        semantic: AnatomicalEntity
+      method: post
+      source: SEMMED
+      outputs:
+      - id: UMLS
+        semantic: BiologicalProcess
+      parameters:
+        fields: has_part
+      path: /query
+      requestBody:
+        body:
+          q: '{inputs[0]}'
+          scopes: umls
+      supportBatch: true
+      response_mapping:
+        $ref: '#/components/x-bte-response-mapping/AnatomicalEntity-has_part-BiologicalProcess'
+      predicate: has_part
+    AnatomicalEntity-produces-BiologicalProcess:
+    - inputSeparator: ','
+      inputs:
+      - id: UMLS
+        semantic: AnatomicalEntity
+      method: post
+      source: SEMMED
+      outputs:
+      - id: UMLS
+        semantic: BiologicalProcess
+      parameters:
+        fields: produces
+      path: /query
+      requestBody:
+        body:
+          q: '{inputs[0]}'
+          scopes: umls
+      supportBatch: true
+      response_mapping:
+        $ref: '#/components/x-bte-response-mapping/AnatomicalEntity-produces-BiologicalProcess'
+      predicate: produces
+    AnatomicalEntity-produced_by-BiologicalProcess:
+    - inputSeparator: ','
+      inputs:
+      - id: UMLS
+        semantic: AnatomicalEntity
+      method: post
+      source: SEMMED
+      outputs:
+      - id: UMLS
+        semantic: BiologicalProcess
+      parameters:
+        fields: produced_by
+      path: /query
+      requestBody:
+        body:
+          q: '{inputs[0]}'
+          scopes: umls
+      supportBatch: true
+      response_mapping:
+        $ref: '#/components/x-bte-response-mapping/AnatomicalEntity-produced_by-BiologicalProcess'
+      predicate: produced_by
+    AnatomicalEntity-related_to-Gene:
+    - inputSeparator: ','
+      inputs:
+      - id: UMLS
+        semantic: AnatomicalEntity
+      method: post
+      source: SEMMED
+      outputs:
+      - id: UMLS
+        semantic: Gene
+      parameters:
+        fields: related_to
+      path: /query
+      requestBody:
+        body:
+          q: '{inputs[0]}'
+          scopes: umls
+      supportBatch: true
+      response_mapping:
+        $ref: '#/components/x-bte-response-mapping/AnatomicalEntity-related_to-Gene'
+      predicate: related_to
+    AnatomicalEntity-quantifier_qualifier-PhenotypicFeature:
+    - inputSeparator: ','
+      inputs:
+      - id: UMLS
+        semantic: AnatomicalEntity
+      method: post
+      source: SEMMED
+      outputs:
+      - id: UMLS
+        semantic: PhenotypicFeature
+      parameters:
+        fields: quantifier_qualifier
+      path: /query
+      requestBody:
+        body:
+          q: '{inputs[0]}'
+          scopes: umls
+      supportBatch: true
+      response_mapping:
+        $ref: '#/components/x-bte-response-mapping/AnatomicalEntity-quantifier_qualifier-PhenotypicFeature'
+      predicate: quantifier_qualifier
+    AnatomicalEntity-has_part-Cell:
+    - inputSeparator: ','
+      inputs:
+      - id: UMLS
+        semantic: AnatomicalEntity
+      method: post
+      source: SEMMED
+      outputs:
+      - id: UMLS
+        semantic: Cell
+      parameters:
+        fields: has_part
+      path: /query
+      requestBody:
+        body:
+          q: '{inputs[0]}'
+          scopes: umls
+      supportBatch: true
+      response_mapping:
+        $ref: '#/components/x-bte-response-mapping/AnatomicalEntity-has_part-Cell'
+      predicate: has_part
+    AnatomicalEntity-location_of-BiologicalProcess:
+    - inputSeparator: ','
+      inputs:
+      - id: UMLS
+        semantic: AnatomicalEntity
+      method: post
+      source: SEMMED
+      outputs:
+      - id: UMLS
+        semantic: BiologicalProcess
+      parameters:
+        fields: location_of
+      path: /query
+      requestBody:
+        body:
+          q: '{inputs[0]}'
+          scopes: umls
+      supportBatch: true
+      response_mapping:
+        $ref: '#/components/x-bte-response-mapping/AnatomicalEntity-location_of-BiologicalProcess'
+      predicate: location_of
+    AnatomicalEntity-has_part-DiseaseOrPhenotypicFeature:
+    - inputSeparator: ','
+      inputs:
+      - id: UMLS
+        semantic: AnatomicalEntity
+      method: post
+      source: SEMMED
+      outputs:
+      - id: UMLS
+        semantic: DiseaseOrPhenotypicFeature
+      parameters:
+        fields: has_part
+      path: /query
+      requestBody:
+        body:
+          q: '{inputs[0]}'
+          scopes: umls
+      supportBatch: true
+      response_mapping:
+        $ref: '#/components/x-bte-response-mapping/AnatomicalEntity-has_part-DiseaseOrPhenotypicFeature'
+      predicate: has_part
+    AnatomicalEntity-quantifier_qualifier-ChemicalSubstance:
+    - inputSeparator: ','
+      inputs:
+      - id: UMLS
+        semantic: AnatomicalEntity
+      method: post
+      source: SEMMED
+      outputs:
+      - id: UMLS
+        semantic: ChemicalSubstance
+      parameters:
+        fields: quantifier_qualifier
+      path: /query
+      requestBody:
+        body:
+          q: '{inputs[0]}'
+          scopes: umls
+      supportBatch: true
+      response_mapping:
+        $ref: '#/components/x-bte-response-mapping/AnatomicalEntity-quantifier_qualifier-ChemicalSubstance'
+      predicate: quantifier_qualifier
+    AnatomicalEntity-coexists_with-DiseaseOrPhenotypicFeature:
+    - inputSeparator: ','
+      inputs:
+      - id: UMLS
+        semantic: AnatomicalEntity
+      method: post
+      source: SEMMED
+      outputs:
+      - id: UMLS
+        semantic: DiseaseOrPhenotypicFeature
+      parameters:
+        fields: coexists_with
+      path: /query
+      requestBody:
+        body:
+          q: '{inputs[0]}'
+          scopes: umls
+      supportBatch: true
+      response_mapping:
+        $ref: '#/components/x-bte-response-mapping/AnatomicalEntity-coexists_with-DiseaseOrPhenotypicFeature'
+      predicate: coexists_with
+    AnatomicalEntity-part_of-BiologicalProcess:
+    - inputSeparator: ','
+      inputs:
+      - id: UMLS
+        semantic: AnatomicalEntity
+      method: post
+      source: SEMMED
+      outputs:
+      - id: UMLS
+        semantic: BiologicalProcess
+      parameters:
+        fields: part_of
+      path: /query
+      requestBody:
+        body:
+          q: '{inputs[0]}'
+          scopes: umls
+      supportBatch: true
+      response_mapping:
+        $ref: '#/components/x-bte-response-mapping/AnatomicalEntity-part_of-BiologicalProcess'
+      predicate: part_of
+    AnatomicalEntity-disrupted_by-DiseaseOrPhenotypicFeature:
+    - inputSeparator: ','
+      inputs:
+      - id: UMLS
+        semantic: AnatomicalEntity
+      method: post
+      source: SEMMED
+      outputs:
+      - id: UMLS
+        semantic: DiseaseOrPhenotypicFeature
+      parameters:
+        fields: disrupted_by
+      path: /query
+      requestBody:
+        body:
+          q: '{inputs[0]}'
+          scopes: umls
+      supportBatch: true
+      response_mapping:
+        $ref: '#/components/x-bte-response-mapping/AnatomicalEntity-disrupted_by-DiseaseOrPhenotypicFeature'
+      predicate: disrupted_by
+    AnatomicalEntity-has_part-CellularComponent:
+    - inputSeparator: ','
+      inputs:
+      - id: UMLS
+        semantic: AnatomicalEntity
+      method: post
+      source: SEMMED
+      outputs:
+      - id: UMLS
+        semantic: CellularComponent
+      parameters:
+        fields: has_part
+      path: /query
+      requestBody:
+        body:
+          q: '{inputs[0]}'
+          scopes: umls
+      supportBatch: true
+      response_mapping:
+        $ref: '#/components/x-bte-response-mapping/AnatomicalEntity-has_part-CellularComponent'
+      predicate: has_part
+    AnatomicalEntity-produces-DiseaseOrPhenotypicFeature:
+    - inputSeparator: ','
+      inputs:
+      - id: UMLS
+        semantic: AnatomicalEntity
+      method: post
+      source: SEMMED
+      outputs:
+      - id: UMLS
+        semantic: DiseaseOrPhenotypicFeature
+      parameters:
+        fields: produces
+      path: /query
+      requestBody:
+        body:
+          q: '{inputs[0]}'
+          scopes: umls
+      supportBatch: true
+      response_mapping:
+        $ref: '#/components/x-bte-response-mapping/AnatomicalEntity-produces-DiseaseOrPhenotypicFeature'
+      predicate: produces
+    AnatomicalEntity-part_of-DiseaseOrPhenotypicFeature:
+    - inputSeparator: ','
+      inputs:
+      - id: UMLS
+        semantic: AnatomicalEntity
+      method: post
+      source: SEMMED
+      outputs:
+      - id: UMLS
+        semantic: DiseaseOrPhenotypicFeature
+      parameters:
+        fields: part_of
+      path: /query
+      requestBody:
+        body:
+          q: '{inputs[0]}'
+          scopes: umls
+      supportBatch: true
+      response_mapping:
+        $ref: '#/components/x-bte-response-mapping/AnatomicalEntity-part_of-DiseaseOrPhenotypicFeature'
+      predicate: part_of
+    AnatomicalEntity-related_to-AnatomicalEntity:
+    - inputSeparator: ','
+      inputs:
+      - id: UMLS
+        semantic: AnatomicalEntity
+      method: post
+      source: SEMMED
+      outputs:
+      - id: UMLS
+        semantic: AnatomicalEntity
+      parameters:
+        fields: related_to
+      path: /query
+      requestBody:
+        body:
+          q: '{inputs[0]}'
+          scopes: umls
+      supportBatch: true
+      response_mapping:
+        $ref: '#/components/x-bte-response-mapping/AnatomicalEntity-related_to-AnatomicalEntity'
+      predicate: related_to
+    AnatomicalEntity-treats-DiseaseOrPhenotypicFeature:
+    - inputSeparator: ','
+      inputs:
+      - id: UMLS
+        semantic: AnatomicalEntity
+      method: post
+      source: SEMMED
+      outputs:
+      - id: UMLS
+        semantic: DiseaseOrPhenotypicFeature
+      parameters:
+        fields: treats
+      path: /query
+      requestBody:
+        body:
+          q: '{inputs[0]}'
+          scopes: umls
+      supportBatch: true
+      response_mapping:
+        $ref: '#/components/x-bte-response-mapping/AnatomicalEntity-treats-DiseaseOrPhenotypicFeature'
+      predicate: treats
+    AnatomicalEntity-affected_by-BiologicalProcess:
+    - inputSeparator: ','
+      inputs:
+      - id: UMLS
+        semantic: AnatomicalEntity
+      method: post
+      source: SEMMED
+      outputs:
+      - id: UMLS
+        semantic: BiologicalProcess
+      parameters:
+        fields: affected_by
+      path: /query
+      requestBody:
+        body:
+          q: '{inputs[0]}'
+          scopes: umls
+      supportBatch: true
+      response_mapping:
+        $ref: '#/components/x-bte-response-mapping/AnatomicalEntity-affected_by-BiologicalProcess'
+      predicate: affected_by
+    AnatomicalEntity-subclass_of-DiseaseOrPhenotypicFeature:
+    - inputSeparator: ','
+      inputs:
+      - id: UMLS
+        semantic: AnatomicalEntity
+      method: post
+      source: SEMMED
+      outputs:
+      - id: UMLS
+        semantic: DiseaseOrPhenotypicFeature
+      parameters:
+        fields: subclass_of
+      path: /query
+      requestBody:
+        body:
+          q: '{inputs[0]}'
+          scopes: umls
+      supportBatch: true
+      response_mapping:
+        $ref: '#/components/x-bte-response-mapping/AnatomicalEntity-subclass_of-DiseaseOrPhenotypicFeature'
+      predicate: subclass_of
+    AnatomicalEntity-entity_negatively_regulated_by_entity-Gene:
+    - inputSeparator: ','
+      inputs:
+      - id: UMLS
+        semantic: AnatomicalEntity
+      method: post
+      source: SEMMED
+      outputs:
+      - id: UMLS
+        semantic: Gene
+      parameters:
+        fields: entity_negatively_regulated_by_entity
+      path: /query
+      requestBody:
+        body:
+          q: '{inputs[0]}'
+          scopes: umls
+      supportBatch: true
+      response_mapping:
+        $ref: '#/components/x-bte-response-mapping/AnatomicalEntity-entity_negatively_regulated_by_entity-Gene'
+      predicate: entity_negatively_regulated_by_entity
+    AnatomicalEntity-located_in-Cell:
+    - inputSeparator: ','
+      inputs:
+      - id: UMLS
+        semantic: AnatomicalEntity
+      method: post
+      source: SEMMED
+      outputs:
+      - id: UMLS
+        semantic: Cell
+      parameters:
+        fields: located_in
+      path: /query
+      requestBody:
+        body:
+          q: '{inputs[0]}'
+          scopes: umls
+      supportBatch: true
+      response_mapping:
+        $ref: '#/components/x-bte-response-mapping/AnatomicalEntity-located_in-Cell'
+      predicate: located_in
+    AnatomicalEntity-coexists_with-Gene:
+    - inputSeparator: ','
+      inputs:
+      - id: UMLS
+        semantic: AnatomicalEntity
+      method: post
+      source: SEMMED
+      outputs:
+      - id: UMLS
+        semantic: Gene
+      parameters:
+        fields: coexists_with
+      path: /query
+      requestBody:
+        body:
+          q: '{inputs[0]}'
+          scopes: umls
+      supportBatch: true
+      response_mapping:
+        $ref: '#/components/x-bte-response-mapping/AnatomicalEntity-coexists_with-Gene'
+      predicate: coexists_with
+    AnatomicalEntity-physically_interacts_with-Cell:
+    - inputSeparator: ','
+      inputs:
+      - id: UMLS
+        semantic: AnatomicalEntity
+      method: post
+      source: SEMMED
+      outputs:
+      - id: UMLS
+        semantic: Cell
+      parameters:
+        fields: physically_interacts_with
+      path: /query
+      requestBody:
+        body:
+          q: '{inputs[0]}'
+          scopes: umls
+      supportBatch: true
+      response_mapping:
+        $ref: '#/components/x-bte-response-mapping/AnatomicalEntity-physically_interacts_with-Cell'
+      predicate: physically_interacts_with
+    AnatomicalEntity-entity_positively_regulates_entity-Cell:
+    - inputSeparator: ','
+      inputs:
+      - id: UMLS
+        semantic: AnatomicalEntity
+      method: post
+      source: SEMMED
+      outputs:
+      - id: UMLS
+        semantic: Cell
+      parameters:
+        fields: entity_positively_regulates_entity
+      path: /query
+      requestBody:
+        body:
+          q: '{inputs[0]}'
+          scopes: umls
+      supportBatch: true
+      response_mapping:
+        $ref: '#/components/x-bte-response-mapping/AnatomicalEntity-entity_positively_regulates_entity-Cell'
+      predicate: entity_positively_regulates_entity
+    AnatomicalEntity-related_to-BiologicalProcess:
+    - inputSeparator: ','
+      inputs:
+      - id: UMLS
+        semantic: AnatomicalEntity
+      method: post
+      source: SEMMED
+      outputs:
+      - id: UMLS
+        semantic: BiologicalProcess
+      parameters:
+        fields: related_to
+      path: /query
+      requestBody:
+        body:
+          q: '{inputs[0]}'
+          scopes: umls
+      supportBatch: true
+      response_mapping:
+        $ref: '#/components/x-bte-response-mapping/AnatomicalEntity-related_to-BiologicalProcess'
+      predicate: related_to
+    AnatomicalEntity-entity_negatively_regulated_by_entity-ChemicalSubstance:
+    - inputSeparator: ','
+      inputs:
+      - id: UMLS
+        semantic: AnatomicalEntity
+      method: post
+      source: SEMMED
+      outputs:
+      - id: UMLS
+        semantic: ChemicalSubstance
+      parameters:
+        fields: entity_negatively_regulated_by_entity
+      path: /query
+      requestBody:
+        body:
+          q: '{inputs[0]}'
+          scopes: umls
+      supportBatch: true
+      response_mapping:
+        $ref: '#/components/x-bte-response-mapping/AnatomicalEntity-entity_negatively_regulated_by_entity-ChemicalSubstance'
+      predicate: entity_negatively_regulated_by_entity
+    AnatomicalEntity-superclass_of-DiseaseOrPhenotypicFeature:
+    - inputSeparator: ','
+      inputs:
+      - id: UMLS
+        semantic: AnatomicalEntity
+      method: post
+      source: SEMMED
+      outputs:
+      - id: UMLS
+        semantic: DiseaseOrPhenotypicFeature
+      parameters:
+        fields: superclass_of
+      path: /query
+      requestBody:
+        body:
+          q: '{inputs[0]}'
+          scopes: umls
+      supportBatch: true
+      response_mapping:
+        $ref: '#/components/x-bte-response-mapping/AnatomicalEntity-superclass_of-DiseaseOrPhenotypicFeature'
+      predicate: superclass_of
+    AnatomicalEntity-interacts_with-DiseaseOrPhenotypicFeature:
+    - inputSeparator: ','
+      inputs:
+      - id: UMLS
+        semantic: AnatomicalEntity
+      method: post
+      source: SEMMED
+      outputs:
+      - id: UMLS
+        semantic: DiseaseOrPhenotypicFeature
+      parameters:
+        fields: interacts_with
+      path: /query
+      requestBody:
+        body:
+          q: '{inputs[0]}'
+          scopes: umls
+      supportBatch: true
+      response_mapping:
+        $ref: '#/components/x-bte-response-mapping/AnatomicalEntity-interacts_with-DiseaseOrPhenotypicFeature'
+      predicate: interacts_with
+    AnatomicalEntity-predisposes-DiseaseOrPhenotypicFeature:
+    - inputSeparator: ','
+      inputs:
+      - id: UMLS
+        semantic: AnatomicalEntity
+      method: post
+      source: SEMMED
+      outputs:
+      - id: UMLS
+        semantic: DiseaseOrPhenotypicFeature
+      parameters:
+        fields: predisposes
+      path: /query
+      requestBody:
+        body:
+          q: '{inputs[0]}'
+          scopes: umls
+      supportBatch: true
+      response_mapping:
+        $ref: '#/components/x-bte-response-mapping/AnatomicalEntity-predisposes-DiseaseOrPhenotypicFeature'
+      predicate: predisposes
+    AnatomicalEntity-preceded_by-DiseaseOrPhenotypicFeature:
+    - inputSeparator: ','
+      inputs:
+      - id: UMLS
+        semantic: AnatomicalEntity
+      method: post
+      source: SEMMED
+      outputs:
+      - id: UMLS
+        semantic: DiseaseOrPhenotypicFeature
+      parameters:
+        fields: preceded_by
+      path: /query
+      requestBody:
+        body:
+          q: '{inputs[0]}'
+          scopes: umls
+      supportBatch: true
+      response_mapping:
+        $ref: '#/components/x-bte-response-mapping/AnatomicalEntity-preceded_by-DiseaseOrPhenotypicFeature'
+      predicate: preceded_by
+    AnatomicalEntity-location_of-CellularComponent:
+    - inputSeparator: ','
+      inputs:
+      - id: UMLS
+        semantic: AnatomicalEntity
+      method: post
+      source: SEMMED
+      outputs:
+      - id: UMLS
+        semantic: CellularComponent
+      parameters:
+        fields: location_of
+      path: /query
+      requestBody:
+        body:
+          q: '{inputs[0]}'
+          scopes: umls
+      supportBatch: true
+      response_mapping:
+        $ref: '#/components/x-bte-response-mapping/AnatomicalEntity-location_of-CellularComponent'
+      predicate: location_of
+    AnatomicalEntity-physically_interacts_with-ChemicalSubstance:
+    - inputSeparator: ','
+      inputs:
+      - id: UMLS
+        semantic: AnatomicalEntity
+      method: post
+      source: SEMMED
+      outputs:
+      - id: UMLS
+        semantic: ChemicalSubstance
+      parameters:
+        fields: physically_interacts_with
+      path: /query
+      requestBody:
+        body:
+          q: '{inputs[0]}'
+          scopes: umls
+      supportBatch: true
+      response_mapping:
+        $ref: '#/components/x-bte-response-mapping/AnatomicalEntity-physically_interacts_with-ChemicalSubstance'
+      predicate: physically_interacts_with
+    AnatomicalEntity-affects-BiologicalProcess:
+    - inputSeparator: ','
+      inputs:
+      - id: UMLS
+        semantic: AnatomicalEntity
+      method: post
+      source: SEMMED
+      outputs:
+      - id: UMLS
+        semantic: BiologicalProcess
+      parameters:
+        fields: affects
+      path: /query
+      requestBody:
+        body:
+          q: '{inputs[0]}'
+          scopes: umls
+      supportBatch: true
+      response_mapping:
+        $ref: '#/components/x-bte-response-mapping/AnatomicalEntity-affects-BiologicalProcess'
+      predicate: affects
+    AnatomicalEntity-related_to-PhenotypicFeature:
+    - inputSeparator: ','
+      inputs:
+      - id: UMLS
+        semantic: AnatomicalEntity
+      method: post
+      source: SEMMED
+      outputs:
+      - id: UMLS
+        semantic: PhenotypicFeature
+      parameters:
+        fields: related_to
+      path: /query
+      requestBody:
+        body:
+          q: '{inputs[0]}'
+          scopes: umls
+      supportBatch: true
+      response_mapping:
+        $ref: '#/components/x-bte-response-mapping/AnatomicalEntity-related_to-PhenotypicFeature'
+      predicate: related_to
+    AnatomicalEntity-biomarker_for-DiseaseOrPhenotypicFeature:
+    - inputSeparator: ','
+      inputs:
+      - id: UMLS
+        semantic: AnatomicalEntity
+      method: post
+      source: SEMMED
+      outputs:
+      - id: UMLS
+        semantic: DiseaseOrPhenotypicFeature
+      parameters:
+        fields: biomarker_for
+      path: /query
+      requestBody:
+        body:
+          q: '{inputs[0]}'
+          scopes: umls
+      supportBatch: true
+      response_mapping:
+        $ref: '#/components/x-bte-response-mapping/AnatomicalEntity-biomarker_for-DiseaseOrPhenotypicFeature'
+      predicate: biomarker_for
+    AnatomicalEntity-manifestation_of-BiologicalProcess:
+    - inputSeparator: ','
+      inputs:
+      - id: UMLS
+        semantic: AnatomicalEntity
+      method: post
+      source: SEMMED
+      outputs:
+      - id: UMLS
+        semantic: BiologicalProcess
+      parameters:
+        fields: manifestation_of
+      path: /query
+      requestBody:
+        body:
+          q: '{inputs[0]}'
+          scopes: umls
+      supportBatch: true
+      response_mapping:
+        $ref: '#/components/x-bte-response-mapping/AnatomicalEntity-manifestation_of-BiologicalProcess'
+      predicate: manifestation_of
+    AnatomicalEntity-location_of-PhenotypicFeature:
+    - inputSeparator: ','
+      inputs:
+      - id: UMLS
+        semantic: AnatomicalEntity
+      method: post
+      source: SEMMED
+      outputs:
+      - id: UMLS
+        semantic: PhenotypicFeature
+      parameters:
+        fields: location_of
+      path: /query
+      requestBody:
+        body:
+          q: '{inputs[0]}'
+          scopes: umls
+      supportBatch: true
+      response_mapping:
+        $ref: '#/components/x-bte-response-mapping/AnatomicalEntity-location_of-PhenotypicFeature'
+      predicate: location_of
+    AnatomicalEntity-location_of-Cell:
+    - inputSeparator: ','
+      inputs:
+      - id: UMLS
+        semantic: AnatomicalEntity
+      method: post
+      source: SEMMED
+      outputs:
+      - id: UMLS
+        semantic: Cell
+      parameters:
+        fields: location_of
+      path: /query
+      requestBody:
+        body:
+          q: '{inputs[0]}'
+          scopes: umls
+      supportBatch: true
+      response_mapping:
+        $ref: '#/components/x-bte-response-mapping/AnatomicalEntity-location_of-Cell'
+      predicate: location_of
+  x-bte-response-mapping:
+    AnatomicalEntity-has_part-AnatomicalEntity:
+      umls: has_part.umls
+      pmid: has_part.pmid
+    AnatomicalEntity-positively_regulated_by-Gene:
+      umls: positively_regulated_by.umls
+      pmid: positively_regulated_by.pmid
+    AnatomicalEntity-affected_by-ChemicalSubstance:
+      umls: affected_by.umls
+      pmid: affected_by.pmid
+    AnatomicalEntity-disrupted_by-ChemicalSubstance:
+      umls: disrupted_by.umls
+      pmid: disrupted_by.pmid
+    AnatomicalEntity-produced_by-Gene:
+      umls: produced_by.umls
+      pmid: produced_by.pmid
+    AnatomicalEntity-occurs_in-BiologicalProcess:
+      umls: occurs_in.umls
+      pmid: occurs_in.pmid
+    AnatomicalEntity-affects-DiseaseOrPhenotypicFeature:
+      umls: affects.umls
+      pmid: affects.pmid
+    AnatomicalEntity-related_to-DiseaseOrPhenotypicFeature:
+      umls: related_to.umls
+      pmid: related_to.pmid
+    AnatomicalEntity-causes-DiseaseOrPhenotypicFeature:
+      umls: causes.umls
+      pmid: causes.pmid
+    AnatomicalEntity-location_of-Gene:
+      umls: location_of.umls
+      pmid: location_of.pmid
+    AnatomicalEntity-part_of-Cell:
+      umls: part_of.umls
+      pmid: part_of.pmid
+    AnatomicalEntity-produces-Gene:
+      umls: produces.umls
+      pmid: produces.pmid
+    AnatomicalEntity-located_in-AnatomicalEntity:
+      umls: located_in.umls
+      pmid: located_in.pmid
+    AnatomicalEntity-has_part-Gene:
+      umls: has_part.umls
+      pmid: has_part.pmid
+    AnatomicalEntity-location_of-DiseaseOrPhenotypicFeature:
+      umls: location_of.umls
+      pmid: location_of.pmid
+    AnatomicalEntity-has_part-ChemicalSubstance:
+      umls: has_part.umls
+      pmid: has_part.pmid
+    AnatomicalEntity-affected_by-Gene:
+      umls: affected_by.umls
+      pmid: affected_by.pmid
+    AnatomicalEntity-produced_by-CellularComponent:
+      umls: produced_by.umls
+      pmid: produced_by.pmid
+    AnatomicalEntity-disrupted_by-Gene:
+      umls: disrupted_by.umls
+      pmid: disrupted_by.pmid
+    AnatomicalEntity-produces-AnatomicalEntity:
+      umls: produces.umls
+      pmid: produces.pmid
+    AnatomicalEntity-location_of-ChemicalSubstance:
+      umls: location_of.umls
+      pmid: location_of.pmid
+    AnatomicalEntity-produced_by-Cell:
+      umls: produced_by.umls
+      pmid: produced_by.pmid
+    AnatomicalEntity-part_of-AnatomicalEntity:
+      umls: part_of.umls
+      pmid: part_of.pmid
+    AnatomicalEntity-location_of-AnatomicalEntity:
+      umls: location_of.umls
+      pmid: location_of.pmid
+    AnatomicalEntity-located_in-CellularComponent:
+      umls: located_in.umls
+      pmid: located_in.pmid
+    AnatomicalEntity-quantifier_qualifier-Gene:
+      umls: quantifier_qualifier.umls
+      pmid: quantifier_qualifier.pmid
+    AnatomicalEntity-produced_by-DiseaseOrPhenotypicFeature:
+      umls: produced_by.umls
+      pmid: produced_by.pmid
+    AnatomicalEntity-affected_by-DiseaseOrPhenotypicFeature:
+      umls: affected_by.umls
+      pmid: affected_by.pmid
+    AnatomicalEntity-positively_regulated_by-ChemicalSubstance:
+      umls: positively_regulated_by.umls
+      pmid: positively_regulated_by.pmid
+    AnatomicalEntity-interacts_with-Gene:
+      umls: interacts_with.umls
+      pmid: interacts_with.pmid
+    AnatomicalEntity-coexists_with-BiologicalProcess:
+      umls: coexists_with.umls
+      pmid: coexists_with.pmid
+    AnatomicalEntity-has_manifestation-DiseaseOrPhenotypicFeature:
+      umls: has_manifestation.umls
+      pmid: has_manifestation.pmid
+    AnatomicalEntity-preceded_by-BiologicalProcess:
+      umls: preceded_by.umls
+      pmid: preceded_by.pmid
+    AnatomicalEntity-entity_positively_regulated_by_entity-DiseaseOrPhenotypicFeature:
+      umls: entity_positively_regulated_by_entity.umls
+      pmid: entity_positively_regulated_by_entity.pmid
+    AnatomicalEntity-subclass_of-BiologicalProcess:
+      umls: subclass_of.umls
+      pmid: subclass_of.pmid
+    AnatomicalEntity-precedes-BiologicalProcess:
+      umls: precedes.umls
+      pmid: precedes.pmid
+    AnatomicalEntity-produces-ChemicalSubstance:
+      umls: produces.umls
+      pmid: produces.pmid
+    AnatomicalEntity-occurs_in-DiseaseOrPhenotypicFeature:
+      umls: occurs_in.umls
+      pmid: occurs_in.pmid
+    AnatomicalEntity-has_part-BiologicalProcess:
+      umls: has_part.umls
+      pmid: has_part.pmid
+    AnatomicalEntity-produces-BiologicalProcess:
+      umls: produces.umls
+      pmid: produces.pmid
+    AnatomicalEntity-produced_by-BiologicalProcess:
+      umls: produced_by.umls
+      pmid: produced_by.pmid
+    AnatomicalEntity-related_to-Gene:
+      umls: related_to.umls
+      pmid: related_to.pmid
+    AnatomicalEntity-quantifier_qualifier-PhenotypicFeature:
+      umls: quantifier_qualifier.umls
+      pmid: quantifier_qualifier.pmid
+    AnatomicalEntity-has_part-Cell:
+      umls: has_part.umls
+      pmid: has_part.pmid
+    AnatomicalEntity-location_of-BiologicalProcess:
+      umls: location_of.umls
+      pmid: location_of.pmid
+    AnatomicalEntity-has_part-DiseaseOrPhenotypicFeature:
+      umls: has_part.umls
+      pmid: has_part.pmid
+    AnatomicalEntity-quantifier_qualifier-ChemicalSubstance:
+      umls: quantifier_qualifier.umls
+      pmid: quantifier_qualifier.pmid
+    AnatomicalEntity-coexists_with-DiseaseOrPhenotypicFeature:
+      umls: coexists_with.umls
+      pmid: coexists_with.pmid
+    AnatomicalEntity-part_of-BiologicalProcess:
+      umls: part_of.umls
+      pmid: part_of.pmid
+    AnatomicalEntity-disrupted_by-DiseaseOrPhenotypicFeature:
+      umls: disrupted_by.umls
+      pmid: disrupted_by.pmid
+    AnatomicalEntity-has_part-CellularComponent:
+      umls: has_part.umls
+      pmid: has_part.pmid
+    AnatomicalEntity-produces-DiseaseOrPhenotypicFeature:
+      umls: produces.umls
+      pmid: produces.pmid
+    AnatomicalEntity-part_of-DiseaseOrPhenotypicFeature:
+      umls: part_of.umls
+      pmid: part_of.pmid
+    AnatomicalEntity-related_to-AnatomicalEntity:
+      umls: related_to.umls
+      pmid: related_to.pmid
+    AnatomicalEntity-treats-DiseaseOrPhenotypicFeature:
+      umls: treats.umls
+      pmid: treats.pmid
+    AnatomicalEntity-affected_by-BiologicalProcess:
+      umls: affected_by.umls
+      pmid: affected_by.pmid
+    AnatomicalEntity-subclass_of-DiseaseOrPhenotypicFeature:
+      umls: subclass_of.umls
+      pmid: subclass_of.pmid
+    AnatomicalEntity-entity_negatively_regulated_by_entity-Gene:
+      umls: entity_negatively_regulated_by_entity.umls
+      pmid: entity_negatively_regulated_by_entity.pmid
+    AnatomicalEntity-located_in-Cell:
+      umls: located_in.umls
+      pmid: located_in.pmid
+    AnatomicalEntity-coexists_with-Gene:
+      umls: coexists_with.umls
+      pmid: coexists_with.pmid
+    AnatomicalEntity-physically_interacts_with-Cell:
+      umls: physically_interacts_with.umls
+      pmid: physically_interacts_with.pmid
+    AnatomicalEntity-entity_positively_regulates_entity-Cell:
+      umls: entity_positively_regulates_entity.umls
+      pmid: entity_positively_regulates_entity.pmid
+    AnatomicalEntity-related_to-BiologicalProcess:
+      umls: related_to.umls
+      pmid: related_to.pmid
+    AnatomicalEntity-entity_negatively_regulated_by_entity-ChemicalSubstance:
+      umls: entity_negatively_regulated_by_entity.umls
+      pmid: entity_negatively_regulated_by_entity.pmid
+    AnatomicalEntity-superclass_of-DiseaseOrPhenotypicFeature:
+      umls: superclass_of.umls
+      pmid: superclass_of.pmid
+    AnatomicalEntity-interacts_with-DiseaseOrPhenotypicFeature:
+      umls: interacts_with.umls
+      pmid: interacts_with.pmid
+    AnatomicalEntity-predisposes-DiseaseOrPhenotypicFeature:
+      umls: predisposes.umls
+      pmid: predisposes.pmid
+    AnatomicalEntity-preceded_by-DiseaseOrPhenotypicFeature:
+      umls: preceded_by.umls
+      pmid: preceded_by.pmid
+    AnatomicalEntity-location_of-CellularComponent:
+      umls: location_of.umls
+      pmid: location_of.pmid
+    AnatomicalEntity-physically_interacts_with-ChemicalSubstance:
+      umls: physically_interacts_with.umls
+      pmid: physically_interacts_with.pmid
+    AnatomicalEntity-affects-BiologicalProcess:
+      umls: affects.umls
+      pmid: affects.pmid
+    AnatomicalEntity-related_to-PhenotypicFeature:
+      umls: related_to.umls
+      pmid: related_to.pmid
+    AnatomicalEntity-biomarker_for-DiseaseOrPhenotypicFeature:
+      umls: biomarker_for.umls
+      pmid: biomarker_for.pmid
+    AnatomicalEntity-manifestation_of-BiologicalProcess:
+      umls: manifestation_of.umls
+      pmid: manifestation_of.pmid
+    AnatomicalEntity-location_of-PhenotypicFeature:
+      umls: location_of.umls
+      pmid: location_of.pmid
+    AnatomicalEntity-location_of-Cell:
+      umls: location_of.umls
+      pmid: location_of.pmid
