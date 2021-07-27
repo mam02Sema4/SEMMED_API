@@ -5,8 +5,8 @@ info:
     name: BioThings Team
     x-id: https://github.com/biothings
     x-role: responsible developers
-  description: Documentation of the SEMMED disease query web services.  Learn more
-    about [mydisease.info](http://pending.biothings.io/semmed)
+  description: Documentation of the SEMMED biological process query web services.  Learn
+    more about [semmed biological process](http://pending.biothings.io/semmedbp)
   termsOfService: http://biothings.ncats.io
   title: SEMMED Biological Process API
   version: '1.0'
@@ -42,9 +42,9 @@ paths:
             schema:
               properties:
                 ids:
-                  description: 'multiple disease IDs separated by comma. Note that
-                    currently we only take the input ids up to 1000 maximum, the rest
-                    will be omitted. Type: string (list). Max: 1000.'
+                  description: 'multiple biological process IDs separated by comma.
+                    Note that currently we only take the input ids up to 1000 maximum,
+                    the rest will be omitted. Type: string (list). Max: 1000.'
                   type: string
               required:
               - ids
@@ -56,14 +56,15 @@ paths:
                 items:
                   $ref: '#/components/schemas/Disease'
                 type: array
-          description: A list of matching disease objects
+          description: A list of matching biological process objects
         '400':
           content:
             application/json:
               schema:
                 $ref: '#/components/schemas/ErrorResult'
           description: A response indicating an improperly formatted query
-      summary: For a list of disease IDs, return the matching disease object
+      summary: For a list of biological process IDs, return the matching biological
+        process object
       tags:
       - gene
   /geneset/{genesetid}:
@@ -92,10 +93,10 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/Disease'
-          description: A matching disease object
+          description: A matching biological process object
         '404':
-          description: A response indicating an unknown disease ID
-      summary: Retrieve disease objects based on ID
+          description: A response indicating an unknown biological process ID
+      summary: Retrieve biological process objects based on ID
       tags:
       - disease
   /metadata:
@@ -106,8 +107,8 @@ paths:
         name: callback
       responses:
         '200':
-          description: mydisease.info metadata object
-      summary: Get metadata about the data available from mydisease.info
+          description: semmed biological process metadata object
+      summary: Get metadata about the data available from semmed biological process
       tags:
       - metadata
   /metadata/fields:
@@ -123,9 +124,9 @@ paths:
         name: format
       responses:
         '200':
-          description: mydisease.info metadata fields object
-      summary: Get metadata about the data fields available from a mydisease.info
-        chem object
+          description: semmed biological process metadata fields object
+      summary: Get metadata about the data fields available from a semmed biological
+        process chem object
       tags:
       - metadata
   /query:
@@ -173,8 +174,8 @@ paths:
               schema:
                 $ref: '#/components/schemas/ErrorResult'
           description: A response indicating an improperly formatted query
-      summary: Make disease queries and return matching disease hits. Supports JSONP
-        and CORS as well.
+      summary: Make biological process queries and return matching biological process
+        hits. Supports JSONP and CORS as well.
       tags:
       - query
     post:
@@ -217,7 +218,8 @@ paths:
               schema:
                 $ref: '#/components/schemas/ErrorResult'
           description: A response indicating an improperly formatted query
-      summary: Make batch disease queries and return matching disease hits
+      summary: Make batch biological process queries and return matching biological
+        process hits
       tags:
       - query
       x-bte-kgs-operations:
@@ -372,10 +374,10 @@ components:
       schema:
         type: string
     dotfield:
-      description: 'control the format of the returned disease object. If "true" or
-        "1", all fields will be collapsed into a single level deep object (all nested
-        objects will be a single level deep, using dotfield notation to signify the
-        nested structure) Type: boolean. Default: false.'
+      description: 'control the format of the returned biological process object.
+        If "true" or "1", all fields will be collapsed into a single level deep object
+        (all nested objects will be a single level deep, using dotfield notation to
+        signify the nested structure) Type: boolean. Default: false.'
       in: query
       name: dotfield
       schema:
@@ -406,10 +408,10 @@ components:
         type: string
     fields:
       description: 'a comma-separated list of fields (in dotfield notation) used to
-        limit the fields returned from the matching disease hit(s). The supported
-        field names can be found from any disease object or from the /metadata/fields
-        endpoint. If "fields=all", all available fields will be returned. Type: string
-        (list). Default: all. Max: 1000.'
+        limit the fields returned from the matching biological process hit(s). The
+        supported field names can be found from any biological process object or from
+        the /metadata/fields endpoint. If "fields=all", all available fields will
+        be returned. Type: string (list). Default: all. Max: 1000.'
       in: query
       name: fields
       schema:
@@ -422,9 +424,9 @@ components:
       schema:
         type: string
     from:
-      description: 'the number of matching disease hits to skip, starting from 0.  This
-        can be useful for paging in combination with the "size" parameter. Type: integer.
-        Default: None.'
+      description: 'the number of matching biological process hits to skip, starting
+        from 0.  This can be useful for paging in combination with the "size" parameter.
+        Type: integer. Default: None.'
       in: query
       name: from
       schema:
@@ -444,8 +446,8 @@ components:
       schema:
         type: string
     size:
-      description: 'the maximum number of matching disease hits to return per batch.
-        Type: integer. Default: 10.'
+      description: 'the maximum number of matching biological process hits to return
+        per batch. Type: integer. Default: 10.'
       in: query
       name: size
       schema:

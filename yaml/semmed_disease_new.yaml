@@ -106,8 +106,8 @@ paths:
         name: callback
       responses:
         '200':
-          description: mydisease.info metadata object
-      summary: Get metadata about the data available from mydisease.info
+          description: semmed disease metadata object
+      summary: Get metadata about the data available from semmed disease
       tags:
       - metadata
   /metadata/fields:
@@ -123,8 +123,8 @@ paths:
         name: format
       responses:
         '200':
-          description: mydisease.info metadata fields object
-      summary: Get metadata about the data fields available from a mydisease.info
+          description: semmed disease metadata fields object
+      summary: Get metadata about the data fields available from a semmed disease
         chem object
       tags:
       - metadata

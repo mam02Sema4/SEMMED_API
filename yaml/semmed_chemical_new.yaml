@@ -5,8 +5,8 @@ info:
     name: BioThings Team
     x-id: https://github.com/biothings
     x-role: responsible developers
-  description: Documentation of the SEMMED disease query web services.  Learn more
-    about [mydisease.info](http://pending.biothings.io/semmed)
+  description: Documentation of the SEMMED chemical query web services.  Learn more
+    about [semmed chemical](http://pending.biothings.io/semmedchemical)
   termsOfService: http://biothings.ncats.io
   title: SEMMED Chemical API
   version: '1.0'
@@ -42,7 +42,7 @@ paths:
             schema:
               properties:
                 ids:
-                  description: 'multiple disease IDs separated by comma. Note that
+                  description: 'multiple chemical IDs separated by comma. Note that
                     currently we only take the input ids up to 1000 maximum, the rest
                     will be omitted. Type: string (list). Max: 1000.'
                   type: string
@@ -56,14 +56,14 @@ paths:
                 items:
                   $ref: '#/components/schemas/Disease'
                 type: array
-          description: A list of matching disease objects
+          description: A list of matching chemical objects
         '400':
           content:
             application/json:
               schema:
                 $ref: '#/components/schemas/ErrorResult'
           description: A response indicating an improperly formatted query
-      summary: For a list of disease IDs, return the matching disease object
+      summary: For a list of chemical IDs, return the matching chemical object
       tags:
       - gene
   /chemical/{chemicalid}:
@@ -92,10 +92,10 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/Disease'
-          description: A matching disease object
+          description: A matching chemical object
         '404':
-          description: A response indicating an unknown disease ID
-      summary: Retrieve disease objects based on ID
+          description: A response indicating an unknown chemical ID
+      summary: Retrieve chemical objects based on ID
       tags:
       - disease
   /metadata:
@@ -106,8 +106,8 @@ paths:
         name: callback
       responses:
         '200':
-          description: mydisease.info metadata object
-      summary: Get metadata about the data available from mydisease.info
+          description: semmed chemical metadata object
+      summary: Get metadata about the data available from semmed chemical
       tags:
       - metadata
   /metadata/fields:
@@ -123,8 +123,8 @@ paths:
         name: format
       responses:
         '200':
-          description: mydisease.info metadata fields object
-      summary: Get metadata about the data fields available from a mydisease.info
+          description: semmed chemical metadata fields object
+      summary: Get metadata about the data fields available from a semmed chemical
         chem object
       tags:
       - metadata
@@ -173,7 +173,7 @@ paths:
               schema:
                 $ref: '#/components/schemas/ErrorResult'
           description: A response indicating an improperly formatted query
-      summary: Make disease queries and return matching disease hits. Supports JSONP
+      summary: Make chemical queries and return matching chemical hits. Supports JSONP
         and CORS as well.
       tags:
       - query
@@ -217,7 +217,7 @@ paths:
               schema:
                 $ref: '#/components/schemas/ErrorResult'
           description: A response indicating an improperly formatted query
-      summary: Make batch disease queries and return matching disease hits
+      summary: Make batch chemical queries and return matching chemical hits
       tags:
       - query
       x-bte-kgs-operations:
@@ -380,10 +380,10 @@ components:
       schema:
         type: string
     dotfield:
-      description: 'control the format of the returned disease object. If "true" or
-        "1", all fields will be collapsed into a single level deep object (all nested
-        objects will be a single level deep, using dotfield notation to signify the
-        nested structure) Type: boolean. Default: false.'
+      description: 'control the format of the returned chemical object. If "true"
+        or "1", all fields will be collapsed into a single level deep object (all
+        nested objects will be a single level deep, using dotfield notation to signify
+        the nested structure) Type: boolean. Default: false.'
       in: query
       name: dotfield
       schema:
@@ -414,8 +414,8 @@ components:
         type: string
     fields:
       description: 'a comma-separated list of fields (in dotfield notation) used to
-        limit the fields returned from the matching disease hit(s). The supported
-        field names can be found from any disease object or from the /metadata/fields
+        limit the fields returned from the matching chemical hit(s). The supported
+        field names can be found from any chemical object or from the /metadata/fields
         endpoint. If "fields=all", all available fields will be returned. Type: string
         (list). Default: all. Max: 1000.'
       in: query
@@ -430,7 +430,7 @@ components:
       schema:
         type: string
     from:
-      description: 'the number of matching disease hits to skip, starting from 0.  This
+      description: 'the number of matching chemical hits to skip, starting from 0.  This
         can be useful for paging in combination with the "size" parameter. Type: integer.
         Default: None.'
       in: query
@@ -452,7 +452,7 @@ components:
       schema:
         type: string
     size:
-      description: 'the maximum number of matching disease hits to return per batch.
+      description: 'the maximum number of matching chemical hits to return per batch.
         Type: integer. Default: 10.'
       in: query
       name: size
