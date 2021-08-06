@@ -1,0 +1,16 @@
+{
+    "chemicalentity": "ChemicalEntity",
+    "drug": "ChemicalEntity",
+    "activityandbehavior": null,
+    "anatomicalentity": null,
+    "biologicalentity": null,
+    "physiologicalprocess": "PhysiologicalProcess",
+    "cell": "Cell",
+    "cellularcomponent": "CellularComponent",
+    "disease": "Disease",
+    "nucleicacidentity": "NucleicAcidEntity",
+    "genomicentity": null,
+    "grossanatomicalstructure": "GrossAnatomicalStructure",
+    "phenotypicfeature": "PhenotypicFeature",
+    "protein": "NucleicAcidEntity"
+}
